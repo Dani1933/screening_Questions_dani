@@ -14,7 +14,7 @@ console.log(titleCase("sHoRt AnD sToUt"));
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 console.log("\n--- Level 2: Delay (Tunggu 3 Detik) ---");
-delay(3000).then(() => console.log('Runs after 3 seconds [cite: 43]'));
+delay(3000).then(() => console.log('Runs after 3 seconds'));
 function fetchData(url: string, callback: (err: string | null, data: string | null) => void) {
   setTimeout(() => {
     if (!url) {
@@ -35,19 +35,21 @@ function processData(data: string, callback: (err: string | null, data: string |
   }, 1000);
 }
 
+function fetchDataPromise(url: string): Promise<string> {
+  return new Promise((res, rej) => fetchData(url, (e, d) => e ? rej(e) : res(d!)));
+}
+
+function processDataPromise(data: string): Promise<string> {
+  return new Promise((res, rej) => processData(data, (e, d) => e ? rej(e) : res(d!)));
+}
+
 async function processDataAsync(url: string) {
   console.log("\n--- Level 2.5: Mengambil & Memproses Data ---");
   try {
-    const data = await new Promise<string>((res, rej) => {
-      fetchData(url, (e, d) => e ? rej(e) : res(d!));
-    });
-    
-    const processed = await new Promise<string>((res, rej) => {
-      processData(data, (e, d) => e ? rej(e) : res(d!));
-    });
-
-    console.log("Processed Data:", processed); 
-    } catch (err) {
+    const data = await fetchDataPromise(url);
+    const processed = await processDataPromise(data);
+    console.log("Processed Data:", processed);
+  } catch (err) {
     console.error("Error:", err);
   }
 }
